@@ -26,3 +26,10 @@
 *.exe
 *.out
 *.app
+
+
+
+# specific ignores
+b.txt
+output.txt
+*.stackdump
