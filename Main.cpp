@@ -9,11 +9,14 @@ void SolveProblemForN(int pN, std::ofstream* oS, std::ifstream* iF);
 void PrintArrayBasedOnTeamMatchups(int pArr[], int length, int indOfTeam1, int numParticipants, std::ofstream* oSPtr);
 void SolveAndWrite(int pArr[], int length, int numParticipants, std::ofstream* oSPtr);
 void LoopThroughInputFile();
+void DeleteDefaultOutputFile();
 
+static bool hasWrittentoFileBefore;
 
 
 int main()
 {
+	hasWrittentoFileBefore = false;
 	bool bIsRunning = true;
 	char initialCommand = 'I';
 	while(bIsRunning)
@@ -78,10 +81,11 @@ void SolveProblemForN(int pN, std::ofstream* oS, std::ifstream* iF)
 			std::cout << "WRITING TO OUTPUT.TXT" << std::endl; //HighNumberSolution
 			// FIGURE OUT IF THE OSTREAM ALREADY EXISTS AND DO STUFF WITH MYFILE IF IT WASNT INITIALIZED PREVIOUSLY
 			std::ofstream myfile;
-			myfile.open ("output.txt");
+			myfile.open ("output.txt", std::ios_base::app);
 			oS = &myfile;
 			SolveAndWrite(Arr, lengthOfArr, pN, oS);
 			oS->close();
+			hasWrittentoFileBefore = true;
 		}
 	}
 }
@@ -135,6 +139,14 @@ void PrintArrayBasedOnTeamMatchups(int pArr[], int length, int indOfTeam1, int n
 void SolveAndWrite(int pArr[], int length, int numParticipants, std::ofstream* oSPtr)
 {
 	bool bIsConsole = (numParticipants<11);
+	// if the file is not empty then print 2*n # chars
+	if(!bIsConsole && hasWrittentoFileBefore)
+	{
+		for(int i = 0; i< numParticipants*2 ; i++)
+		{
+			*oSPtr << '#' << std::endl;
+		}
+	}
 	((bIsConsole)? std::cout : (*oSPtr))<< 1 << ":";
 	int indOfTeam1 = 0;
 	PrintArrayBasedOnTeamMatchups(pArr, length, indOfTeam1, numParticipants, oSPtr);
@@ -165,6 +177,10 @@ void LoopThroughInputFile()
 		struct stat buffer;   
  		isValid = (stat (fileString.c_str(), &buffer) == 0);
 	}
+
+	DeleteDefaultOutputFile();
+
+
 
 	std::ifstream myReadFile;
 	myReadFile.open(fileString.c_str());
@@ -199,4 +215,16 @@ void PrintArray(int pArr[], int length)
 		std::cout << pArr[i] << ((i<length-1)? (", "): ("") );
 	}
 	std::cout << std::endl;
+}
+
+void DeleteDefaultOutputFile()
+{
+	bool EXISTS = false;
+	struct stat buffer;   
+	std::string fileString = "Output.txt";
+	EXISTS = (stat (fileString.c_str(), &buffer) == 0);
+	if(EXISTS)
+	{
+		if( remove( fileString.c_str() ) != 0 ) perror( "Error deleting file" );
+	}
 }
