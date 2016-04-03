@@ -16,7 +16,6 @@ static bool hasWrittentoFileBefore;
 
 int main()
 {
-	hasWrittentoFileBefore = false;
 	bool bIsRunning = true;
 	char initialCommand = 'I';
 	while(bIsRunning)
@@ -34,6 +33,7 @@ int main()
 		std::cout << ">             " << std::endl;
 		std::cout << ">             " << std::endl;
 		std::cout << ">             " << std::endl;
+		hasWrittentoFileBefore = false;
 		switch(initialCommand)
 		{
 			case 'F':
