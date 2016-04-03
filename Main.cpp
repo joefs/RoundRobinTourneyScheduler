@@ -1,10 +1,15 @@
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <sys/stat.h>
 
 void RotateArray(int pArr[], int pLowInd, int pHighInd);
 void PrintArray(int pArr[], int length);
-void SolveProblemForN(int pN);
-void PrintArrayBasedOnTeamMatchups(int pArr[], int length, int indOfTeam1, int numParticipants);
+void SolveProblemForN(int pN, std::ofstream* oS, std::ifstream* iF);
+void PrintArrayBasedOnTeamMatchups(int pArr[], int length, int indOfTeam1, int numParticipants, std::ofstream* oSPtr);
+void SolveAndWrite(int pArr[], int length, int numParticipants, std::ofstream* oSPtr);
+void LoopThroughInputFile();
+
 
 
 int main()
@@ -13,22 +18,31 @@ int main()
 	char initialCommand = 'I';
 	while(bIsRunning)
 	{
+		std::cout << ">             " << std::endl;
+		std::cout << ">             " << std::endl;
+		std::cout << ">             " << std::endl;
+		std::cout << ">             " << std::endl;
 		std::cout << "HELLO, AND WELCOME TO THE PROGRAM. PLEASE SELECT AMONGST THE FOLLOWING OPTIONS:" << std::endl;
 		std::cout << '\t' << "F: RUN FROM FILE" << std::endl;
 		std::cout << '\t' << "C: RUN FROM CONSOLE" << std::endl;
 		std::cout << '\t' << "Q: QUIT" << std::endl;
 		initialCommand= (std::cin.get());
+		std::cout << ">             " << std::endl;
+		std::cout << ">             " << std::endl;
+		std::cout << ">             " << std::endl;
+		std::cout << ">             " << std::endl;
 		switch(initialCommand)
 		{
 			case 'F':
 			case 'f':
+				LoopThroughInputFile(); // will yield to multiple cases of SolveProblemForN();
 				break;
 			case 'C':
 			case 'c':
 					std::cout << "Please enter a number of tournament participants" << std::endl;
 					int N;
 					std::cin >> N;
-					SolveProblemForN(N);
+					SolveProblemForN(N, NULL, NULL);
 				break;
 			case 'Q':
 			case 'q':
@@ -46,7 +60,7 @@ int main()
 }
 
 
-void SolveProblemForN(int pN)
+void SolveProblemForN(int pN, std::ofstream* oS, std::ifstream* iF)
 {
 	if(pN>1)
 	{
@@ -55,17 +69,19 @@ void SolveProblemForN(int pN)
 		//
 		Arr[lengthOfArr-1] = -1;
 		for(int i=0; i<pN; i++)Arr[i] = i+1;
-		//
-		std::cout<< 1 << ":";
- 		int indOfTeam1 = 0;
-		PrintArrayBasedOnTeamMatchups(Arr, lengthOfArr, indOfTeam1, pN);
-		//
-		for(int i = 1; i<lengthOfArr-1; i++)
+		if(pN<11)
 		{
-			RotateArray(Arr, 0, lengthOfArr-2);
-			indOfTeam1++;
-			std::cout<< i+1 << ":";
-			PrintArrayBasedOnTeamMatchups(Arr, lengthOfArr, indOfTeam1, pN);
+			SolveAndWrite(Arr, lengthOfArr, pN, oS);
+		}
+		else
+		{
+			std::cout << "WRITING TO OUTPUT.TXT" << std::endl; //HighNumberSolution
+			// FIGURE OUT IF THE OSTREAM ALREADY EXISTS AND DO STUFF WITH MYFILE IF IT WASNT INITIALIZED PREVIOUSLY
+			std::ofstream myfile;
+			myfile.open ("output.txt");
+			oS = &myfile;
+			SolveAndWrite(Arr, lengthOfArr, pN, oS);
+			oS->close();
 		}
 	}
 }
@@ -87,18 +103,8 @@ void RotateArray(int pArr[], int pLowInd, int pHighInd)
 }
 
 
-void PrintArray(int pArr[], int length)
-{
-	for(int i = 0; i< length; i++)
-	{
-		std::cout << pArr[i] << ((i<length-1)? (", "): ("") );
-	}
-	std::cout << std::endl;
-}
 
-
-
-void PrintArrayBasedOnTeamMatchups(int pArr[], int length, int indOfTeam1, int numParticipants)
+void PrintArrayBasedOnTeamMatchups(int pArr[], int length, int indOfTeam1, int numParticipants, std::ofstream* oSPtr)
 {
 	int curInd = indOfTeam1;
 	int mirroredInd;
@@ -109,9 +115,88 @@ void PrintArrayBasedOnTeamMatchups(int pArr[], int length, int indOfTeam1, int n
 		if((displace== numParticipants - 1)&&(numParticipants%2==0)) curInd = numParticipants-1; 
 		mirroredInd = (length-1)-curInd;
 		mirroredVal = pArr[mirroredInd];
-		if(mirroredVal != -1)std::cout << mirroredVal;
-		else std::cout << "-";
-		if(displace != numParticipants-1) std::cout<< ":";
+		if(mirroredVal != -1)
+		{
+			((oSPtr==NULL)? std::cout : (*oSPtr))<< mirroredVal;
+		}
+		else
+		{
+			((oSPtr==NULL)? std::cout : (*oSPtr))<< "-";
+		}
+		if(displace != numParticipants-1)
+		{
+			((oSPtr==NULL)? std::cout : (*oSPtr))<< ":";
+		}
+	}
+	((oSPtr==NULL)? std::cout : (*oSPtr))<< std::endl;
+}
+
+
+void SolveAndWrite(int pArr[], int length, int numParticipants, std::ofstream* oSPtr)
+{
+	bool bIsConsole = (numParticipants<11);
+	((bIsConsole)? std::cout : (*oSPtr))<< 1 << ":";
+	int indOfTeam1 = 0;
+	PrintArrayBasedOnTeamMatchups(pArr, length, indOfTeam1, numParticipants, oSPtr);
+	//
+	for(int i = 1; i<length-1; i++)
+	{
+		RotateArray(pArr, 0, length-2);
+		indOfTeam1++;
+		((bIsConsole)? std::cout : (*oSPtr))<< i+1 << ":";
+		PrintArrayBasedOnTeamMatchups(pArr, length, indOfTeam1, numParticipants, oSPtr);
+	}
+}
+
+
+
+
+
+
+
+void LoopThroughInputFile()
+{
+	bool isValid = false;
+	std::string fileString;
+	while(!isValid)
+	{
+		std::cout<< "Please provide a VALID input file name."<< std::endl;
+		std::cin >> fileString;
+		struct stat buffer;   
+ 		isValid = (stat (fileString.c_str(), &buffer) == 0);
+	}
+
+	std::ifstream myReadFile;
+	myReadFile.open(fileString.c_str());
+	int currentN;
+	if (myReadFile.is_open()) {
+		std::cout<< "ITS OPEN" << std::endl;
+		 while (!myReadFile.eof()) {
+		    myReadFile >> currentN;
+		    //IF ITS GREATER PASS IN THE OUTPUT FILE AND 
+			SolveProblemForN(currentN, NULL, NULL);
+		 }
+		 // IF OFILE IS OPEN, CLOSE IT NOW
+	}
+	myReadFile.close();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+void PrintArray(int pArr[], int length)
+{
+	for(int i = 0; i< length; i++)
+	{
+		std::cout << pArr[i] << ((i<length-1)? (", "): ("") );
 	}
 	std::cout << std::endl;
 }
