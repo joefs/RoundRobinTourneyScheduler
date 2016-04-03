@@ -144,8 +144,9 @@ void SolveAndWrite(int pArr[], int length, int numParticipants, std::ofstream* o
 	{
 		for(int i = 0; i< numParticipants*2 ; i++)
 		{
-			*oSPtr << '#' << std::endl;
+			*oSPtr << '#';
 		}
+		*oSPtr << std::endl;
 	}
 	((bIsConsole)? std::cout : (*oSPtr))<< 1 << ":";
 	int indOfTeam1 = 0;
