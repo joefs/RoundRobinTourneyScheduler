@@ -78,7 +78,7 @@ void SolveProblemForN(int pN, std::ofstream* oS, std::ifstream* iF)
 		}
 		else
 		{
-			std::cout << "WRITING TO OUTPUT.TXT" << std::endl; //HighNumberSolution
+			//std::cout << "WRITING CASE# " << pN <<" TO OUTPUT.TXT" << std::endl; //HighNumberSolution
 			// FIGURE OUT IF THE OSTREAM ALREADY EXISTS AND DO STUFF WITH MYFILE IF IT WASNT INITIALIZED PREVIOUSLY
 			std::ofstream myfile;
 			myfile.open ("output.txt", std::ios_base::app);
@@ -187,14 +187,15 @@ void LoopThroughInputFile()
 	myReadFile.open(fileString.c_str());
 	int currentN;
 	if (myReadFile.is_open()) {
-		std::cout<< "ITS OPEN" << std::endl;
-		 while (!myReadFile.eof()) {
+		//std::cout<< "ITS OPEN" << std::endl;
+		while (!myReadFile.eof()) {
 		    myReadFile >> currentN;
-		    //IF ITS GREATER PASS IN THE OUTPUT FILE AND 
+		    //std::cout<< "currentN is " << currentN << std::endl;
 			SolveProblemForN(currentN, NULL, NULL);
+			currentN = -1; // to ensure a nonprocess on the last line of input
 		 }
-		 // IF OFILE IS OPEN, CLOSE IT NOW
 	}
+		 // IF OFILE IS OPEN, CLOSE IT NOW
 	myReadFile.close();
 }
 
